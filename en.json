@@ -25,10 +25,10 @@
 
     "header-graph": "Graph",
     "graph-style": "Graph type",
-    "graph-style-linlin": "Linear &ndash; linear",
-    "graph-style-linlog": "Linear &ndash; logarithmic",
-    "graph-style-loglin": "logarithmic &ndash; linear",
-    "graph-style-loglog": "logarithmic &ndash; logarithmic",
+    "graph-linlin": "Linear &ndash; linear",
+    "graph-linlog": "Linear &ndash; logarithmic",
+    "graph-loglin": "logarithmic &ndash; linear",
+    "graph-loglog": "logarithmic &ndash; logarithmic",
     "x-axis": "x-axis",
     "y-axis": "y-axis",
 

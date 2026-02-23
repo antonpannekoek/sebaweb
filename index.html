@@ -154,6 +154,25 @@
   <section>
     <h2 data-i8n="header-graph">Graph</h2>
     <div id="graph"></div>
+    <div>
+      <div>
+      <label for="graph-style" data-i8n="graph-style"></label>
+      <select name="style" id="graph-style" disabled>
+	<option value="linlin" selected data-i8n="graph-linlin"></option>
+	<option value="loglog" data-i8n="graph-loglog"></option>
+	<option value="linlog" data-i8n="graph-linlog"></option>
+	<option value="loglin" data-i8n="graph-loglin"></option>
+      </select>
+      </div>
+      <div>
+      <label for="x-axis" data-i8n="x-axis"></label>
+	<select name="xaxis" id="x-axis" disabled></select>
+      </div>
+      <div>
+      <label for="y-axis" data-i8n="y-axis"></label>
+      <select name="yaxis" id="y-axis" disabled></select>
+      </div>
+    </div>
   </section>
 
   <section id="data-section">
@@ -172,13 +191,15 @@
 <script>
   const FALLBACK_LANG = "en";
   // all data fields output by SeBa in `seba.data`
-  const DATACOLS = ['binid', 'bintype', 'transfertype', 'time',
+  const DATAFIELDS = ['binid', 'bintype', 'transfertype', 'time',
 		    'sep', 'ecc', 'id1', 'type1', 'mass1',
 		    'radius1', 'efftemp1', 'coremass1',
 		    'id2', 'type2', 'mass2',
-		    'radius2', 'efftemp2', 'coremass2'];
+		      'radius2', 'efftemp2', 'coremass2'];
+  const arr = new Array([1,2,3]);
+  console.log(typeof(DATAFIELDS), typeof([1,2,3]), typeof(arr));
   // data columns only of interest
-  const USERDATACOLS = [
+  const USERDATAFIELDS = [
       'transfertype', 'time', 'sep', 'ecc',
       'id1', 'type1', 'mass1', 'radius1', 'efftemp1', 'coremass1',
       'id2', 'type2', 'mass2', 'radius2', 'efftemp2', 'coremass2'
@@ -192,6 +213,10 @@
       {name: "time", min: 1, max: 1e7, value: 13500, step: 0.1, prec: 0, log: true},
       {name: "metal", min: 1e-5, max: 1e-1, value: 1e-3, step: 0.0001, prec: 5, log: true}
   ];
+  const GRAPHDEFAULTS = {
+      'x': "time",
+      "y": "sep"
+  };
 
   // Supported languages with a translation file
   const LANGUAGES = ["en", "nl"];
@@ -226,7 +251,7 @@
       const lang = document.documentElement.lang;
       const translation = translations[lang];
       let ths = [];
-      for (const col of USERDATACOLS) {
+      for (const col of USERDATAFIELDS) {
 	  key = `${col}-field`;
 	  const th = $create('th');
 	  let name = "";
@@ -350,6 +375,28 @@
 	}
     }
 
+  function updateAxisChoices() {
+      for (const name of ['x', 'y']) {
+	  let axis = $id(`${name}-axis`);
+	  let selection = axis.value;
+	  if (!axis.value) {
+	      selection = GRAPHDEFAULTS[name];
+	  }
+	  let options = [];
+	  for (const field of USERDATAFIELDS) {
+	      let option = $create("option");
+	      option.value = field;
+	      option.textContent = _t(`${field}-field`);
+	      if (field == selection) {
+		  option.selected = true;
+	      }
+	      options.push(option);
+	  }
+	  axis.replaceChildren(...options);
+      }
+
+  }
+
   function switchLang(lang) {
       document.documentElement.lang = lang;
       if (!lang in translations) {
@@ -361,10 +408,11 @@
 	  const key = element.dataset.i8n;
 	  if (key in translation) {
 	      value = translation[key];
-	      element.textContent = value;
+	      element.innerHTML = value;
 	  }
       }
       updateTableHeader();
+      updateAxisChoices();
 
   }
 
@@ -422,7 +470,6 @@
 	      lang = FALLBACK_LANG;
 	  }
 	  const translation = translations[lang];
-
 	  let string = "";
 	  if (!key in translation) {
               string = translations[FALLBACK_LANG][key];
@@ -482,8 +529,17 @@
 	try {
           const text = Module.FS.readFile('SeBa.data', { encoding: 'utf8' });
 	    data = readData(text);
-	  populateTable(data);
-	  plotResults(data);
+	    populateTable(data);
+
+	    // Enable graph options
+	    $id('graph-style').disabled = false;
+	    $id('x-axis').disabled = false;
+	    $id('y-axis').disabled = false;
+	    // Add event listeners with *current* data
+	    $id('graph-style').addEventListener('change', () => plot(data));
+	    $id('x-axis').addEventListener('change', () => plot(data));
+	    $id('y-axis').addEventListener('change', () => plot(data));
+	    plot(data);
       } catch (e) {
         appendOutput('Could not read SeBa.data: ' + e, true);
       }
@@ -511,7 +567,7 @@
 	}
 
 	var data = {};
-	DATACOLS.forEach((name, index) => {
+	DATAFIELDS.forEach((name, index) => {
 	    data[name] = array[index];
 	});
 	return data;
@@ -519,9 +575,9 @@
 
     function populateTable(data) {
 	let trs = [];
-	for (var rownr = 0; rownr < data[USERDATACOLS[0]].length; ++rownr) {
+	for (var rownr = 0; rownr < data[USERDATAFIELDS[0]].length; ++rownr) {
 	    let tr = $create('tr');
-	    for (const col of USERDATACOLS) {
+	    for (const col of USERDATAFIELDS) {
 		const td = $create('td');
 		td.textContent = data[col][rownr];
 		tr.appendChild(td);
@@ -532,25 +588,52 @@
 	tbody.replaceChildren(...trs);
     }
 
-    function plotResults(data) {
+  function plot(data) {
+      let xaxis = $id('x-axis').value;
+      let yaxis = $id('y-axis').value;
+            console.log(xaxis, yaxis);
+      if (!xaxis in data) {
+	  xaxis = GRAPHDEFAULTS['x'];
+      }
+      if (!yaxis in data) {
+	  yaxis = GRAPHDEFAULTS['y'];
+      }
+      console.log(xaxis, yaxis);
+      const graphtype = $id("graph-style").value;
+      console.log(graphtype, graphtype == "linlin");
+      let xtype = "log";
+      let ytype = "log";
+      if (graphtype == "linlin") {
+	  xtype = "linear";
+	  ytype = "linear";
+      }
+      if (graphtype == "loglin") {
+	  xtype = "log";
+	  ytype = "linear";
+      }
+      if (graphtype == "linlog") {
+	  xtype = "linear";
+	  ytype = "log";
+      }
 
-	var plottingData = {
-	    x: data[3],
-	    y: data[9],
+	let plottingData = {
+	    x: data[xaxis],
+	    y: data[yaxis],
 	    type: 'scatter'
 	};
-
-	var layout = {
+      console.log("x data = ", plottingData['x']);
+      console.log("y data = ", plottingData['y']);
+	let layout = {
 	    xaxis: {
-		type: 'log',
+		type: xtype,
 		autorange: true
 	    },
 	    yaxis: {
-		type: 'log',
+		type: ytype,
 		autorange: true
 	    }
 	};
-	//console.log(plottingData);
+      console.log("layout = ", layout);
 	Plotly.newPlot('graph', [plottingData], layout);
     }
 

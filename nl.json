@@ -26,10 +26,10 @@
 
     "header-graph": "Grafiek",
     "graph-style": "Type grafiek",
-    "graph-style-linlin": "Lineair &ndash; lineair",
-    "graph-style-linlog": "Lineair &ndash; logaritmisch",
-    "graph-style-loglin": "logaritmisch &ndash; lineair",
-    "graph-style-loglog": "logaritmisch &ndash; logaritmisch",
+    "graph-linlin": "Lineair &ndash; lineair",
+    "graph-linlog": "Lineair &ndash; logaritmisch",
+    "graph-loglin": "logaritmisch &ndash; lineair",
+    "graph-loglog": "logaritmisch &ndash; logaritmisch",
     "x-axis": "x-as",
     "y-axis": "y-as",
 
@@ -39,19 +39,19 @@
 	"bintype-field": "type binary",
 	"transfertype-field": "massa overdrachtstype",
 	"time-field": "tijd",
-    "sep-field": "afstand in zonnestralene",
+    "sep-field": "afstand in zonnestralen",
 	"ecc-field": "eccentriciteit",
     "id1-field": "ster 1 identiteits nummer",
 	"type1-field": "ster 1 type",
     "mass1-field": "stermassa 1 in zonsmassa's",
     "radius1-field": "ster 1 straal in zonnestralen",
-    "efftemp1-field": "logarithme van de effectieve temperature van ster 1",
+    "efftemp1-field": "logarithme van de effectieve temperatuur van ster 1",
     "coremass1-field": "kernmassa van ster 1 in zonsmassa's",
     "id2-field": "ster 2 identiteits nummer",
 	"type2-field": "ster 2 type",
     "mass2-field": "stermassa 2 in zonsmassa's",
     "radius2-field": "ster 2 straal in zonnestralen",
-    "efftemp2-field": "logarithme van de effectieve temperature van ster 2",
+    "efftemp2-field": "logarithme van de effectieve temperatuur van ster 2",
     "coremass2-field": "kernmassa van ster 2 in zonsmassa's"
 
 }
