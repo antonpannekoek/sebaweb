@@ -6,7 +6,8 @@
   <script src='https://cdn.plot.ly/plotly-3.3.0.min.js'></script>
   <style>
     body {
-      font-family: sans-serif;
+	font-family: sans-serif;
+	color: #666;
       margin: 20px;
     }
 
@@ -77,7 +78,7 @@
       background: #eee;
     }
 
-    #run-button:disabled {
+    #start-button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
@@ -85,6 +86,7 @@
     #status {
       margin-left: 10px;
       font-size: 0.9em;
+      font-style: italic;
       color: #555;
     }
 
@@ -92,17 +94,39 @@
 	text-align: right;
 	float: right;
     }
-    
+
+    h2 {
+	margin-bottom: 1em;
+	padding: 0.5em 0.5ex;
+	color: blue;
+	font-size: x-large;
+    }
+    details summary {
+	margin-bottom: 1em;
+	padding: 0.5em 0.5ex;
+	color: blue;
+	font-size: x-large;
+    }
+
   </style>
 </head>
 <body>
-  <h1 data-i8n="seba-main-title">SeBa online</h1>
-  <nav>
+    <nav>
     <select name="lang" id="lang-switch" onchange="switchLang(this.value);">
       <option value="nl" selected>NL</option>
       <option value="en">En</option>
     </select>
   </nav>
+
+    <h1 data-i8n="seba-main-title">SeBa online</h1>
+
+    <section>
+      <details id="program-log">
+	<summary data-i8n="introduction"></summary>
+	<p data-i8n="introduction-text"></p>
+	<output></output>
+      </details>
+    </section>
 
   <section id="controls">
     <form id="user-input">
@@ -115,22 +139,26 @@
 	</div>
       </template>
     </form>
-  <div style="margin-top: 10px;">
-    <button id="run-button" disabled data-i8n="start">Start</button>
+  <div>
+    <button id="start-button" disabled data-i8n="start">Start</button>
     <span id="status"></span>
   </div>
 
-  <section id="program-section">
+  <section>
     <details id="program-log">
       <summary data-i8n="program-log">Program log</summary>
       <output></output>
     </details>
   </section>
 
-  <section id="graph"></section>
+  <section>
+    <h2 data-i8n="header-graph">Graph</h2>
+    <div id="graph"></div>
+  </section>
 
   <section id="data-section">
-    <h2>Output data</h2>
+    <h2 data-i8n="header-results">Results</h2>
+
     <table id="data-table">
       <thead>
         <tr>
@@ -169,8 +197,6 @@
   const LANGUAGES = ["en", "nl"];
 
   const stdoutElem = $q('#program-log output');
-  const runButton = $id('run-button');
-  const statusElem = $id('status');
 
   // Collect output lines in memory as well
   const stdoutLines = [];
@@ -241,7 +267,7 @@
 	    },
 	    onRuntimeInitialized: function() {
 		// Enable the Run button once WASM is ready
-		$id('run-button').disabled = false;
+		$id('start-button').disabled = false;
 	    }
 	};
     }
@@ -324,26 +350,26 @@
 	}
     }
 
-    function switchLang(lang) {
-	document.documentElement.lang = lang;
-	if (!lang in translations) {
-	    lang = FALLBACK_LANG;
-	}
-	const translation = translations[lang];
-	const elements = document.querySelectorAll("[data-i8n]");
-	for (const element of elements) {
-	    const key = element.dataset.i8n;
-	    if (key in translation) {
-		value = translation[key];
-		element.textContent = value;
-	    }
-	}
-	updateTableHeader();
+  function switchLang(lang) {
+      document.documentElement.lang = lang;
+      if (!lang in translations) {
+	  lang = FALLBACK_LANG;
+      }
+      const translation = translations[lang];
+      const elements = document.querySelectorAll("[data-i8n]");
+      for (const element of elements) {
+	  const key = element.dataset.i8n;
+	  if (key in translation) {
+	      value = translation[key];
+	      element.textContent = value;
+	  }
+      }
+      updateTableHeader();
 
-    }
+  }
 
 
-    function updateFromSlider(slider) {
+  function updateFromSlider(slider) {
 	const id = `${slider.dataset.input}-input`;
 	let input = $id(id);
 	const actualValue = Math.pow(10, parseFloat(slider.value));
@@ -389,8 +415,28 @@
 	  }
       }
 
-    // Run button handler
-    function run() {
+      // function to translate strings in JavaScript code
+      function _t(key) {
+      	  document.documentElement.lang = lang;
+	  if (!lang in translations) {
+	      lang = FALLBACK_LANG;
+	  }
+	  const translation = translations[lang];
+
+	  let string = "";
+	  if (!key in translation) {
+              string = translations[FALLBACK_LANG][key];
+	  } else {
+	      string = translation[key];
+	  }
+	  if (!string) {
+	      string = "";
+	  }
+	  return string;
+      }
+
+  // Run SeBa
+  function run() {
       if (!Module || !Module.callMain) {
         alert('Module not initialized yet.');
         return;
@@ -399,8 +445,9 @@
       // Clear previous output
       stdoutLines.length = 0;
       stdoutElem.textContent = '';
-      $id('run-button').disabled = true;
-
+      // Update status
+      $id('start-button').disabled = true;
+      $id('status').textContent = _t("running...");
 	const args = [
 	    '-M',
 	    document.getElementById('mass1-input').value.trim(),
@@ -441,10 +488,12 @@
         appendOutput('Could not read SeBa.data: ' + e, true);
       }
 
-      $id('run-button').disabled = false;
+      // Reset the start button and status field
+	$id('start-button').disabled = false;
+	$id('status').textContent = '';
     };
 
-    $id('run-button').addEventListener('click', run)
+    $id('start-button').addEventListener('click', run)
 
 
     function readData(fileContent) {
@@ -484,7 +533,7 @@
     }
 
     function plotResults(data) {
-				    
+
 	var plottingData = {
 	    x: data[3],
 	    y: data[9],
@@ -497,7 +546,7 @@
 		autorange: true
 	    },
 	    yaxis: {
-		//type: 'log',
+		type: 'log',
 		autorange: true
 	    }
 	};

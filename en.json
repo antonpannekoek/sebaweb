@@ -1,6 +1,10 @@
 {
     "seba-main-title": "SeBa online",
     "lang-toggle": "Nederlands",
+
+    "introduction": "Introduction",
+    "introduction-text": "Few paragraphs of introductory text",
+
     "mass1-name": "Mass star 1",
     "mass2-name": "Mass star 2",
     "ecc-name": "Eccentricity",
@@ -14,9 +18,21 @@
     "sep-tooltip": "Separation between the two stars, in Solar radii.",
     "time-tooltip": "Time span of simulation in units of mega-years (= million years)",
     "metal-tooltip": "Metalliticity is the fraction of atoms with atom numbers higher than Helium compared to the total star mass (which is mainly Hydrogen and Helium)",
-    
+
     "program-log": "Program log",
 
+    "running...": "running...",
+
+    "header-graph": "Graph",
+    "graph-style": "Graph type",
+    "graph-style-linlin": "Linear &ndash; linear",
+    "graph-style-linlog": "Linear &ndash; logarithmic",
+    "graph-style-loglin": "logarithmic &ndash; linear",
+    "graph-style-loglog": "logarithmic &ndash; logarithmic",
+    "x-axis": "x-axis",
+    "y-axis": "y-axis",
+
+    "header-results": "Results",
 
 	"binid-field": "binary identity number",
 	"bintype-field": "binary type",

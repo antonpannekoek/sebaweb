@@ -1,6 +1,10 @@
 {
     "seba-main-title": "SeBa online",
     "lang-toggle": "English",
+
+    "introduction": "Introductie",
+    "introduction-text": "Een paar paragrafen met een introductie tekst.",
+
     "mass1-name": "Massa ster 1",
     "mass2-name": "Massa ster 2",
     "ecc-name": "Eccentriciteit",
@@ -15,9 +19,21 @@
 
     "time-tooltip": "Tijdsinterval van de simulatie, in eenheden van megajaren (miljoenen jaren).",
     "metal-tooltip": "Metalliticiteit is de fractie van atomen met atoomnummers groter dan dat van helium, vergeleken met de totale stermassa (die voornamelijk bestaat uit waterstof en helium).",
-    
+
     "program-log": "Programma log",
 
+    "running...": "draaiende...",
+
+    "header-graph": "Grafiek",
+    "graph-style": "Type grafiek",
+    "graph-style-linlin": "Lineair &ndash; lineair",
+    "graph-style-linlog": "Lineair &ndash; logaritmisch",
+    "graph-style-loglin": "logaritmisch &ndash; lineair",
+    "graph-style-loglog": "logaritmisch &ndash; logaritmisch",
+    "x-axis": "x-as",
+    "y-axis": "y-as",
+
+    "header-results": "Resultaten",
 
     "binid-field": "binary identiteits getal",
 	"bintype-field": "type binary",
@@ -37,5 +53,5 @@
     "radius2-field": "ster 2 straal in zonnestralen",
     "efftemp2-field": "logarithme van de effectieve temperature van ster 2",
     "coremass2-field": "kernmassa van ster 2 in zonsmassa's"
-    
+
 }
