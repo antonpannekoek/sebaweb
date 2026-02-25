@@ -21,7 +21,10 @@
 
     "program-log": "Program log",
 
+    "start": "start",
     "running...": "running...",
+    "update-directly": "Update directly",
+    "update-directly-tooltip": "Run SeBa near instantly when changing any of the input parameters",
 
     "header-graph": "Graph",
     "graph-style": "Graph type",

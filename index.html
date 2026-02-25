@@ -78,9 +78,12 @@
       background: #eee;
     }
 
-    #start-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    #start-button {
+      display: block;
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
 
     #status {
@@ -151,13 +154,16 @@
 	  <input type="range" id="template-range" step="0.01" data-input="template-input"> <!--  oninput="updateFromSlider(this)" -->
 	  <input type="number" id="template-input" min="0.01" max="100" value="1" step="any" data-prec="2" data-range="template-range" onblur="clampValue(this);">
 	  <div class="tooltip" id="template-tooltip">ⓘ <span class="tooltiptext" data-i8n="template-tooltip">something here</span></div>
-	  <p><label for="template-input" data-i8n="template-label"><span data-i8n="template-name"></spam>(<span id="template-min-value"></span> &ndash; <span id="template-max-value"></span>)</label></p>
+	  <p><label for="template-input"><span data-i8n="template-name"></span>(<span id="template-min-value"></span> &ndash; <span id="template-max-value"></span>)</label></p>
 	</div>
       </template>
     </form>
   <div>
     <button id="start-button" disabled data-i8n="start">Start</button>
-    <span id="status"></span>
+    <input type="checkbox" id="direct-update"></input>
+    <label for="direct-update"><span data-i8n="update-directly"></span></label>
+    <div class="tooltip" id="update-directly-tooltip">ⓘ <span class="tooltiptext" data-i8n="update-directly-tooltip"></span></div>
+    <p id="status"></p>
   </div>
 
   <section>
@@ -339,7 +345,7 @@
 	  let label = clone.querySelector("label");
 	  label.name = name;
 	  label.htmlFor = `${name}-input`;
-	  label.dataset.i8n = `${name}-label`;
+	  //label.dataset.i8n = `${name}-label`;
 	  label.innerHTML = `<span data-i8n="${name}-name"></span> (<span id="${name}-min-value"></span> &ndash; <span id="${name}-max-value"></span>)</label>`;
 	  let input = clone.querySelector("input[type=number]");
 	  input.id = `${name}-input`;
@@ -362,18 +368,23 @@
 	  });
 	  slider.addEventListener("input", function(evt) {
 	      clearTimeout(updateTimeout);
-	      updateTimeout = setTimeout(() => {
-	  	  runSeba();
-	      }, INPUTTIMEOUT);
-	  });
+	      if ($id('direct-update').checked) {
+		  updateTimeout = setTimeout(() => {
+	  	      runSeba();
+		  }, INPUTTIMEOUT);
+	      }
+	      });
+
 	  input.addEventListener("input", function(evt) {
 	      updateFromInput(this);
 	  });
 	  input.addEventListener("input", function(evt) {
 	      clearTimeout(updateTimeout);
-	      updateTimeout = setTimeout(() => {
-	  	  runSeba();
-	      }, INPUTTIMEOUT);
+	      if ($id('direct-update').checked) {
+		  updateTimeout = setTimeout(() => {
+	  	      runSeba();
+		  }, INPUTTIMEOUT);
+	      }
 	  });
 
 	  const form = $q("#controls form");
@@ -411,9 +422,7 @@
 	      if (!response.ok) {
 		  throw new Error(`Could not fetch ${lang}.json`);
 	      }
-
 	      translations[lang] = await response.json();
-
 	  } catch (error) {
 	      console.error("Translation error:", error);
 	  }
@@ -446,13 +455,16 @@
       if (!lang in translations) {
 	  lang = FALLBACK_LANG;
       }
-
       const translation = translations[lang];
       const elements = document.querySelectorAll("[data-i8n]");
       for (const element of elements) {
 	  const key = element.dataset.i8n;
 	  if (key in translation) {
 	      value = translation[key];
+	      element.innerHTML = value;
+	  } else {
+	      value = translations[FALLBACK_LANG][key];
+	      console.log(`falling back to default translation for ${key} = ${value}`);
 	      element.innerHTML = value;
 	  }
       }
@@ -535,8 +547,11 @@
   async function runSeba() {
       $id('start-button').disabled = true;
       const Module = await createSeBa({
-	  print: (text) => { stdoutLines.push(text); /* update UI */ },
-	  printErr: (text) => { stdoutLines.push('[stderr] ' + text); /* update UI */ }
+	  print: (text) => appendOutput(text),
+	  printErr: (text) => appendOutput(text),
+	  //printErr: function(text) {
+	  //    appendOutput(text);
+	  //},
       });
 
       if (!Module || !Module.callMain) {
@@ -564,12 +579,12 @@
 	  document.getElementById('metal-input').value.trim()
       ];
 
-      // Optional: remove previous SeBa.data if it exists
+      // Remove previous SeBa.data if it exists
       try {
 	  Module.FS.unlink('SeBa.data');
       } catch (e) {
 	  // Ignore if file did not exist
-	  console.warn('e = ', e);
+	  console.debug("Error when attempting to remove 'SeBa.data': ", e);
       }
 
       // Call main(argc, argv) via callMain
@@ -704,16 +719,16 @@
 
 
   function init() {
+      createControls();
+      updateMinMax();
       loadTranslations().then(() => {
 	  switchLang("nl");
-	  updateMinMax();
-
+	  $id('start-button').disabled = false;
       });
-      createControls();
-      $id('start-button').disabled = false;
-  }
 
-  init();
+  }
+    init();
+
 
 
   </script>
