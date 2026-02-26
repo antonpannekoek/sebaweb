@@ -5,10 +5,12 @@
   <title>SeBa online</title>
   <script src='https://cdn.plot.ly/plotly-3.3.0.min.js'></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
     body {
-	font-family: sans-serif;
+	font-family: "Raleway", Arial, Helvetica, sans-serif;
 	color: #666;
-      margin: 20px;
+	margin: 0;
     }
 
     label {
@@ -37,8 +39,8 @@
       border: 1px solid #ccc;
       padding: 8px;
       overflow-y: auto;
-      line-height: 1.2em;
-      min-height: calc(1.2em * 20); /* approx. 20 lines visible */
+      line-height: 1.2rem;
+      min-height: calc(1.2rem * 20); /* approx. 20 lines visible */
       max-height: 400px;
       background: #f9f9f9;
     }
@@ -69,7 +71,7 @@
     .tooltip {
 	position: relative;
 	display: inline-block;
-	margin-left: 0.5em;
+	margin-left: 0.5rem;
     }
     .tooltiptext {
 	visibility: hidden; /* Hidden by default */
@@ -89,7 +91,7 @@
     }
 
     input[type=number] {
-	margin: 0.2ex 0.2em;
+	margin: 0.2rem;
 	border-radius: 10px;
         padding: 3px 5px;
         border: 2px solid #ccc;
@@ -109,9 +111,13 @@
 
     #status {
       margin-left: 10px;
-      font-size: 0.9em;
+      font-size: 0.9rem;
       font-style: italic;
       color: #555;
+    }
+
+    nav {
+	margin-left: 2rem;
     }
 
     nav select {
@@ -141,19 +147,22 @@
     }
 
     h1 {
-	color: brown;
-	font-size: xx-large;
+	color: #eee;
+	font-size: 60px;
+	font-weight: lighter;
+	font-stretch: 100%;
     }
 
     h2 {
-	margin-bottom: 0em;
-	padding: 0.5em 0.5ex;
+	margin-bottom: 0rem;
+	padding: 0.5rem;
 	color: brown;
 	font-size: x-large;
+	font-weight: normal;
     }
     details summary {
-	margin-bottom: 1em;
-	padding: 0.5em 0.5ex;
+	margin-bottom: 1rem;
+	padding: 0.5rem;
 	color: brown;
 	font-size: x-large;
     }
@@ -161,10 +170,13 @@
 #header {
     grid-area: header;
     width: 100%;
-	}
-	#banner {
-	text-align: center;
-	}
+    background-image: url('./banner.jpg');
+    background-size: covert;
+    padding: 2ex 0;
+}
+#banner {
+    text-align: center;
+}
 #introduction {
 	grid-area: introduction;
 	    justify-self: start;
@@ -197,6 +209,9 @@ main {
 	"graph"
 	"data-section"
 	"program-log";
+
+	padding-left: 2rem;
+	padding-right: 2rem;
 }
 @media (min-width: 700px) {
     main {
