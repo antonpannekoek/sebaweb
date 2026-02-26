@@ -22,7 +22,10 @@
 
     "program-log": "Programma log",
 
+    "start": "start",
     "running...": "draaiende...",
+    "update-directly": "Werk automatisch bij",
+    "update-directly-tooltip": "Draai SeBa automatisch na het veranderen van een parameter",
 
     "header-graph": "Grafiek",
     "graph-style": "Type grafiek",

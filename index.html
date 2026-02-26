@@ -52,9 +52,9 @@
     }
     .tooltiptext {
 	visibility: hidden; /* Hidden by default */
-	width: 130px;
-	background-color: black;
-	color: #ffffff;
+	width: 260px;
+	background-color: #cccccc;
+	color: #333333;
 	text-align: center;
 	padding: 5px 0;
 	border-radius: 6px;
@@ -78,9 +78,12 @@
       background: #eee;
     }
 
-    #start-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    #start-button {
+      display: block;
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
 
     #status {
@@ -93,6 +96,22 @@
     nav select {
 	text-align: right;
 	float: right;
+    }
+
+    /* Hide the (drop-down) arrows and style the <select> element as minimally as possible */
+    #lang-switch {
+	font-size: large;  /* <select> doesn't automatically inherit font-size, since it's native to the browser */
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	background: none;
+	border: none;
+	padding: 0;
+
+	&::-ms-expand {
+	    /* For IE and EdgeHTML: hide dropdown arrow */
+	    display: none;
+	}
     }
 
     h2 {
@@ -108,14 +127,15 @@
 	font-size: x-large;
     }
 
+
   </style>
 </head>
 <body>
     <nav>
-    <select name="lang" id="lang-switch" onchange="switchLang(this.value);">
-      <option value="nl" selected>NL</option>
-      <option value="en">En</option>
-    </select>
+      <select id="lang-switch" name="lang" onchange="switchLang(this.value);">
+	<option value="nl" selected>🇳🇱 NL</option>
+	<option value="en">🇬🇧 En</option>
+      </select>
   </nav>
 
     <h1 data-i8n="seba-main-title">SeBa online</h1>
@@ -131,16 +151,19 @@
     <form id="user-input">
       <template id="control-template">
 	<div id="template-slider">
-	  <input type="range" id="template-range" step="0.01" data-input="template-input" oninput="updateFromSlider(this)">
-	  <input type="number" id="template-input" min="0.01" max="100" value="1" step="any" data-prec="2" data-range="template-range" onblur="clampValue(this);" oninput="updateFromInput(this);">
+	  <input type="range" id="template-range" step="0.01" data-input="template-input"> <!--  oninput="updateFromSlider(this)" -->
+	  <input type="number" id="template-input" min="0.01" max="100" value="1" step="any" data-prec="2" data-range="template-range" onblur="clampValue(this);">
 	  <div class="tooltip" id="template-tooltip">ⓘ <span class="tooltiptext" data-i8n="template-tooltip">something here</span></div>
-	  <p><label for="template-input" data-i8n="template-label"><span data-i8n="template-name"></spam>(<span id="template-min-value"></span> &ndash; <span id="template-max-value"></span>)</label></p>
+	  <p><label for="template-input"><span data-i8n="template-name"></span>(<span id="template-min-value"></span> &ndash; <span id="template-max-value"></span>)</label></p>
 	</div>
       </template>
     </form>
   <div>
     <button id="start-button" disabled data-i8n="start">Start</button>
-    <span id="status"></span>
+    <input type="checkbox" id="direct-update"></input>
+    <label for="direct-update"><span data-i8n="update-directly"></span></label>
+    <div class="tooltip" id="update-directly-tooltip">ⓘ <span class="tooltiptext" data-i8n="update-directly-tooltip"></span></div>
+    <p id="status"></p>
   </div>
 
   <section>
@@ -157,8 +180,8 @@
       <div>
       <label for="graph-style" data-i8n="graph-style"></label>
       <select name="style" id="graph-style" disabled>
-	<option value="linlin" selected data-i8n="graph-linlin"></option>
-	<option value="loglog" data-i8n="graph-loglog"></option>
+	<option value="linlin" data-i8n="graph-linlin"></option>
+	<option value="loglog" selected data-i8n="graph-loglog"></option>
 	<option value="linlog" data-i8n="graph-linlog"></option>
 	<option value="loglin" data-i8n="graph-loglin"></option>
       </select>
@@ -187,9 +210,15 @@
     </table>
   </div>
 
-<script>
-  const FALLBACK_LANG = "en";
+    <!-- Load the generated JS glue code (SeBa.js) after the setup -->
+  <script src="seba.js"></script>
 
+  <script>
+
+  const FALLBACK_LANG = "en";
+  // Give the user some milliseconds to update a value before
+  // running SeBa again
+  const INPUTTIMEOUT = 500;
   // all data fields output by SeBa in `seba.data`
   const DATAFIELDS = ['binid', 'bintype', 'transfertype', 'time',
 		      'sep', 'ecc', 'id1', 'type1', 'mass1',
@@ -205,12 +234,12 @@
   ];
 
   const CONTROLS = [
-      {name: "mass1", min: 0.01, max: 100, value: 1, step: 0.01, prec: 2, log: true},
+      {name: "mass1", min: 0.01, max: 100, value: 2, step: 0.01, prec: 2, log: true},
       {name: "mass2", min: 0.01, max: 100, value: 1, step: 0.01, prec: 2, log: true},
-      {name: "ecc", min: 1e-5, max: 0.999, value: 0.2, step: 0.0001, prec: 4, log: true},
+      {name: "ecc", min: 1e-5, max: 1, value: 0.2, step: 0.0001, prec: 4, log: true},
       {name: "sep", min: 1, max: 1e4, value: 200, step: 0.01, prec: 1, log: true},
       {name: "time", min: 1, max: 1e7, value: 13500, step: 0.1, prec: 0, log: true},
-      {name: "metal", min: 1e-5, max: 1e-1, value: 1e-3, step: 0.0001, prec: 5, log: true}
+      {name: "metal", min: 1e-4, max: 0.03, value: 1e-3, step: 0.0001, prec: 5, log: true}
   ];
   const GRAPHDEFAULTS = {
       'x': "time",
@@ -225,6 +254,7 @@
   // Collect output lines in memory as well
   const stdoutLines = [];
   const stderrLines = [];
+
 
   function $id(idspec) {
       return document.getElementById(idspec);
@@ -243,7 +273,6 @@
   }
 
 
-  var Module;  // global variable for the WASM module
   var translations = {};
 
   function updateTableHeader() {
@@ -291,14 +320,16 @@
 	  printErr: function(text) {
 	      appendOutput(text);
 	  },
-	  onRuntimeInitialized: function() {
-	      // Enable the Run button once WASM is ready
-	      $id('start-button').disabled = false;
-	  }
+	  //onRuntimeInitialized: function() {
+	  //    // Enable the Run button once WASM is ready
+	  //    $id('start-button').disabled = false;
+	  //}
       };
   }
 
   function createControls() {
+      let updateTimeout = null; // Keeps track of input waiting time
+
       const template = $q("#control-template");
       for (const control of CONTROLS) {
 	  const clone = document.importNode(template.content, true);
@@ -314,7 +345,7 @@
 	  let label = clone.querySelector("label");
 	  label.name = name;
 	  label.htmlFor = `${name}-input`;
-	  label.dataset.i8n = `${name}-label`;
+	  //label.dataset.i8n = `${name}-label`;
 	  label.innerHTML = `<span data-i8n="${name}-name"></span> (<span id="${name}-min-value"></span> &ndash; <span id="${name}-max-value"></span>)</label>`;
 	  let input = clone.querySelector("input[type=number]");
 	  input.id = `${name}-input`;
@@ -331,6 +362,30 @@
 	  slider.max = Math.log10(control["max"]);
 	  slider.value = Math.log10(control["value"]);
 	  slider.dataset.input = name;
+
+	  slider.addEventListener("input", function(evt) {
+	      updateFromSlider(this);
+	  });
+	  slider.addEventListener("input", function(evt) {
+	      clearTimeout(updateTimeout);
+	      if ($id('direct-update').checked) {
+		  updateTimeout = setTimeout(() => {
+	  	      runSeba();
+		  }, INPUTTIMEOUT);
+	      }
+	      });
+
+	  input.addEventListener("input", function(evt) {
+	      updateFromInput(this);
+	  });
+	  input.addEventListener("input", function(evt) {
+	      clearTimeout(updateTimeout);
+	      if ($id('direct-update').checked) {
+		  updateTimeout = setTimeout(() => {
+	  	      runSeba();
+		  }, INPUTTIMEOUT);
+	      }
+	  });
 
 	  const form = $q("#controls form");
 	  form.appendChild(clone);
@@ -367,9 +422,7 @@
 	      if (!response.ok) {
 		  throw new Error(`Could not fetch ${lang}.json`);
 	      }
-
 	      translations[lang] = await response.json();
-
 	  } catch (error) {
 	      console.error("Translation error:", error);
 	  }
@@ -408,6 +461,10 @@
 	  const key = element.dataset.i8n;
 	  if (key in translation) {
 	      value = translation[key];
+	      element.innerHTML = value;
+	  } else {
+	      value = translations[FALLBACK_LANG][key];
+	      console.log(`falling back to default translation for ${key} = ${value}`);
 	      element.innerHTML = value;
 	  }
       }
@@ -472,7 +529,7 @@
       const translation = translations[lang];
       let string = "";
       if (!key in translation) {
-          string = translations[FALLBACK_LANG][key];
+	  string = translations[FALLBACK_LANG][key];
       } else {
 	  string = translation[key];
       }
@@ -482,18 +539,30 @@
       return string;
   }
 
+  function createConfig() {
+    return
+  }
+
   // Run SeBa
-  function run() {
+  async function runSeba() {
+      $id('start-button').disabled = true;
+      const Module = await createSeBa({
+	  print: (text) => appendOutput(text),
+	  printErr: (text) => appendOutput(text),
+	  //printErr: function(text) {
+	  //    appendOutput(text);
+	  //},
+      });
+
       if (!Module || !Module.callMain) {
-          alert('Module not initialized yet.');
-          return;
+	  alert('Module not initialized yet.');
+	  return;
       }
 
       // Clear previous output
       stdoutLines.length = 0;
       stdoutElem.textContent = '';
       // Update status
-      $id('start-button').disabled = true;
       $id('status').textContent = _t("running...");
       const args = [
 	  '-M',
@@ -510,38 +579,52 @@
 	  document.getElementById('metal-input').value.trim()
       ];
 
-
-      // Optional: remove previous SeBa.data if it exists
+      // Remove previous SeBa.data if it exists
       try {
-          Module.FS.unlink('SeBa.data');
+	  Module.FS.unlink('SeBa.data');
       } catch (e) {
-          // Ignore if file did not exist
+	  // Ignore if file did not exist
+	  console.debug("Error when attempting to remove 'SeBa.data': ", e);
       }
 
       // Call main(argc, argv) via callMain
       try {
-          Module.callMain(args);
+	  Module.callMain(args);
       } catch (e) {
-          appendOutput('Exception: ' + e, true);
+	  appendOutput('Exception: ' + e, true);
+	  console.error("EXCEPTION: ", e);
       }
 
       // After main returns, try to read output.txt
       try {
-          const text = Module.FS.readFile('SeBa.data', { encoding: 'utf8' });
+	  const text = Module.FS.readFile('SeBa.data', { encoding: 'utf8' });
 	  data = readData(text);
-	  populateTable(data);
 
 	  // Enable graph options
 	  $id('graph-style').disabled = false;
 	  $id('x-axis').disabled = false;
 	  $id('y-axis').disabled = false;
-	  // Add event listeners with *current* data
-	  $id('graph-style').addEventListener('change', () => plot(data));
-	  $id('x-axis').addEventListener('change', () => plot(data));
-	  $id('y-axis').addEventListener('change', () => plot(data));
+	  // Clear event listeners and readd then,
+	  // so that the graph updates with the current data
+	  // Since the listeners are an anonymous closure over `data`,
+	  // we replace the element with a clone; the clone doesn't
+	  // copy the listener, so a new listener is added, which is
+	  // then the only listener
+	  for (const id of ['graph-style', 'x-axis', 'y-axis']) {
+	      const elem = $id(id);
+	      const newElem = elem.cloneNode(true);
+	      newElem.value = elem.value;
+	      newElem.addEventListener('change', () => {
+		  plot(data);
+		  populateTable(data);
+	      });
+	      const parent = elem.parentNode;
+	      parent.replaceChild(newElem, elem);
+	  }
+	  populateTable(data);
 	  plot(data);
       } catch (e) {
-          appendOutput('Could not read SeBa.data: ' + e, true);
+	  appendOutput('Could not read SeBa.data: ' + e, true);
       }
 
       // Reset the start button and status field
@@ -549,7 +632,7 @@
       $id('status').textContent = '';
   };
 
-  $id('start-button').addEventListener('click', run)
+  $id('start-button').addEventListener('click', runSeba)
 
 
   function readData(fileContent) {
@@ -636,21 +719,19 @@
 
 
   function init() {
+      createControls();
+      updateMinMax();
       loadTranslations().then(() => {
 	  switchLang("nl");
-	  updateMinMax();
-
+	  $id('start-button').disabled = false;
       });
-      createControls();
-      setupModule();
-  }
 
-  init();
+  }
+    init();
+
 
 
   </script>
-    <!-- Load the generated JS glue code (SeBa.js) after the setup -->
-  <script src="SeBa.js"></script>
 
 </body>
 </html>
