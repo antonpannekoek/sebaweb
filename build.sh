@@ -1,5 +1,15 @@
 #! /bin/sh
 
+# Run this script from its current directory,
+# with the directory of the SeBa source code as its argument
+# For example,
+#   sh build.sh $OHME/codes/SeBa
+#
+# The script will clean and build SeBa using Emscripten,
+# then copy the necessary files (seba.js and seba.wasm)
+# to the current directory, so it can be found by the
+# webserver
+
 script=$(readlink -f "$0")
 scriptdir=$(dirname "$script")
 
@@ -21,5 +31,3 @@ em++ -I../include -I../include/star -D_SRC_='"no_source_available"' -DHAVE_CONFI
 
 cp seba.js $scriptdir/
 cp seba.wasm $scriptdir/
-
-
