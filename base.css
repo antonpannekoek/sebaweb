@@ -6,6 +6,105 @@ body {
     margin: 0;
 }
 
+nav {
+    margin-left: 2rem;
+}
+
+nav select {
+    text-align: left;
+    float: left;
+}
+
+header {
+    grid-area: header;
+    width: 100%;
+    background-image: url("./banner.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 2ex 0;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "introduction"
+        "controls"
+        "graph"
+        "data-section"
+        "program-log";
+
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+@media (min-width: 700px) {
+    main {
+        grid-template-columns: 300px 1fr;
+        grid-template-areas:
+            "introduction introduction"
+            "controls graph"
+            "data-section data-section"
+            "program-log program-log";
+    }
+}
+
+#banner {
+    text-align: center;
+}
+
+#introduction {
+    grid-area: introduction;
+    justify-self: start;
+}
+
+#controls {
+    grid-area: controls;
+    align-self: start;
+    min-width: 300px;
+}
+
+#graph {
+    grid-area: graph;
+    align-self: end;
+
+    min-width: 700px;
+    overflow-x: auto;
+}
+
+#data-section {
+    grid-area: data-section;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+#program-log {
+    grid-area: program-log;
+    justify-self: start;
+}
+
+h1 {
+    color: #eee;
+    font-size: 60px;
+    font-weight: lighter;
+    font-stretch: 100%;
+}
+
+h2 {
+    margin-bottom: 0rem;
+    padding: 0.5rem;
+    color: brown;
+    font-size: x-large;
+    font-weight: normal;
+}
+
+details summary {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    color: brown;
+    font-size: x-large;
+}
+
 label {
     display: inline-block;
     margin: 0.5em 0.5ex;
@@ -49,19 +148,28 @@ th,
 td {
     border-left: none;
     border-right: none;
-    border-bottom: 1px solid gray;
     padding: 4px 8px;
     text-align: left;
     font-family: monospace;
 }
-thead tr {
+#data-table thead tr {
     background-color: #eee;
 }
-tbody tr:nth-child(odd) {
-    background-color: #ddf;
+/* Add a little bit of spacing between the header and the body */
+#data-table tbody:before {
+    content: "@";
+    display: block;
+    visibility: hidden;
+    line-height: 10px;
 }
-tbody tr:nth-child(even) {
-    background-color: #eee;
+#data-table tbody td {
+    border-bottom: 1px solid #d6d6d6;
+}
+#data-table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+#data-table tbody tr:nth-child(even) {
+    background-color: #eeee;
 }
 
 .tooltip {
@@ -80,10 +188,21 @@ tbody tr:nth-child(even) {
     position: absolute;
     z-index: 1; /* Ensure tooltip is displayed above content */
 }
-
 /* Show the tooltip text on hover */
 .tooltip:hover .tooltiptext {
     visibility: visible;
+}
+
+#start-button {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+#status {
+    margin-left: 10px;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #555;
 }
 
 input[type="number"] {
@@ -102,7 +221,7 @@ button {
     padding: 0.3rem 1.3rem;
     margin: 0.2rem;
     border-radius: 1rem;
-    border: 3px solid #8af;
+    border: 3px solid #07f;
     background: #eee;
     box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.6);
     font-size: 0.8rem;
@@ -119,24 +238,10 @@ button {
         cursor: not-allowed;
     }
 }
-#start-button {
-    font-size: 1rem;
-}
 
-#status {
-    margin-left: 10px;
-    font-size: 0.9rem;
-    font-style: italic;
-    color: #555;
-}
-
-nav {
-    margin-left: 2rem;
-}
-
-nav select {
-    text-align: left;
-    float: left;
+select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .control {
@@ -145,9 +250,12 @@ nav select {
     padding: 0.2em 0.5ex;
 }
 
-/* Hide the (drop-down) arrows and style the <select> element as minimally as possible */
+/* Hide the (drop-down) arrows and style the <select> element as
+   minimally as possible */
 #lang-switch {
-    font-size: large; /* <select> doesn't automatically inherit font-size, since it's native to the browser */
+    /* <select> doesn't automatically inherit font-size, since the element
+   is usually taken from the OS */
+    font-size: large;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -155,88 +263,12 @@ nav select {
     border: none;
     padding: 0;
 
+    /* tiny bit of light shadow, to make the text better readable against
+   a dark background */
+    text-shadow: 1px 1px 0px rgba(192, 192, 192, 0.6);
+
     &::-ms-expand {
-        /* For IE and EdgeHTML: hide dropdown arrow */
+        /* IE and Edge */
         display: none;
-    }
-}
-
-h1 {
-    color: #eee;
-    font-size: 60px;
-    font-weight: lighter;
-    font-stretch: 100%;
-}
-
-h2 {
-    margin-bottom: 0rem;
-    padding: 0.5rem;
-    color: brown;
-    font-size: x-large;
-    font-weight: normal;
-}
-details summary {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    color: brown;
-    font-size: x-large;
-}
-
-#header {
-    grid-area: header;
-    width: 100%;
-    background-image: url("./banner.jpg");
-    background-size: covert;
-    padding: 2ex 0;
-}
-#banner {
-    text-align: center;
-}
-#introduction {
-    grid-area: introduction;
-    justify-self: start;
-}
-#controls {
-    grid-area: controls;
-    align-self: start;
-    min-width: 300px;
-}
-#graph {
-    grid-area: graph;
-    align-self: end;
-
-    min-width: 700px;
-    overflow-x: auto;
-}
-#data-section {
-    grid-area: data-section;
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-#program-log {
-    grid-area: program-log;
-    justify-self: start;
-}
-main {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-        "introduction"
-        "controls"
-        "graph"
-        "data-section"
-        "program-log";
-
-    padding-left: 2rem;
-    padding-right: 2rem;
-}
-@media (min-width: 700px) {
-    main {
-        grid-template-columns: 300px 1fr;
-        grid-template-areas:
-            "introduction introduction"
-            "controls graph"
-            "data-section data-section"
-            "program-log program-log";
     }
 }
