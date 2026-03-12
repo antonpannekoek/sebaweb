@@ -371,12 +371,15 @@ async function runSeba() {
     // Remove previous SeBa.data if it exists
     try {
         Module.FS.unlink("SeBa.data");
-    } catch (e) {
+    } catch (error) {
         // Ignore if file did not exist
-        console.log(
-            "Ignoring error when attempting to remove 'SeBa.data': ",
-            e,
-        );
+        if (error.errno != 44) {
+            // 44 appears
+            console.error(
+                "Error when attempting to remove 'SeBa.data': ",
+                error,
+            );
+        }
     }
 
     // Call main(argc, argv) via callMain
