@@ -26,6 +26,13 @@ const GRAPHDEFAULTS = {
     y: VARIANT == "single" ? "mass" : "mass1",
 };
 
+const GRAPH_SCALES = {
+    linlin: ["linear", "linear"],
+    linlog: ["linear", "log"],
+    loglin: ["log", "linear"],
+    loglog: ["log", "log"],
+};
+
 // Supported languages with a translation file
 const LANGUAGES = ["en", "nl"];
 const DEFAULT_LANG = "nl";
@@ -412,7 +419,7 @@ function readData(fileContent) {
             continue;
         }
         const cols = trimmed.split(/\s+/);
-	cols.forEach((value, i) => array[i].push(parseFloat(value)));
+        cols.forEach((value, i) => array[i].push(parseFloat(value)));
     }
 
     /* Convert the columns to named columns */
@@ -480,20 +487,7 @@ function plot(data) {
     }
 
     const graphtype = $id("graph-style").value;
-    let xtype = "log";
-    let ytype = "log";
-    if (graphtype == "linlin") {
-        xtype = "linear";
-        ytype = "linear";
-    }
-    if (graphtype == "loglin") {
-        xtype = "log";
-        ytype = "linear";
-    }
-    if (graphtype == "linlog") {
-        xtype = "linear";
-        ytype = "log";
-    }
+    const [xtype, ytype] = GRAPH_SCALES[graphtype] ?? ["log", "log"];
 
     let plottingData = {
         x: data[xaxis],
