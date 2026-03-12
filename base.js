@@ -3,12 +3,7 @@ import createSeBaHires from "./seba_hirestime.js";
 import * as C_S from "./constants-single.js";
 import * as C_B from "./constants-binary.js";
 
-//const USE_SINGLE = JSON.parse(
-//    document.getElementById('variant').textContent)['single'];
-//const USE_SINGLE = document.querySelector('meta[name="variant"]').content == "single";
-// get the query parameters from the url
 const params = new URLSearchParams(window.location.search);
-const USE_SINGLE = params.get("variant") == "single";
 const VARIANT = params.get("variant");
 const DEBUG = params.get("debug") == "debug";
 
@@ -39,7 +34,6 @@ const stdoutElem = $q("#program-log output");
 
 // Collect output lines in memory as well
 const stdoutLines = [];
-const stderrLines = [];
 
 function $id(idspec) {
     return document.getElementById(idspec);
@@ -315,10 +309,6 @@ function _t(key) {
         string = "";
     }
     return string;
-}
-
-function createConfig() {
-    return;
 }
 
 // Run SeBa
