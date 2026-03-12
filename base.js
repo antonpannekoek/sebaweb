@@ -600,10 +600,9 @@ async function init() {
     $id("lang-switch").addEventListener("change", async (event) => {
         await switchLang(event.target.value);
     });
-    loadTranslations().then(() => {
-        switchLang(lang);
-        $id("start-button").disabled = false;
-    });
+    await loadTranslations();
+    switchLang(lang);
+    $id("start-button").disabled = false;
 }
 
 // `init()` sets up some essentials after the page has loaded,
