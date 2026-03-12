@@ -429,7 +429,8 @@ async function runSeba() {
 }
 
 function readData(fileContent) {
-    var array = Array.from({ length: 18 }, (_) => []);
+    const length = CONST.DATAFIELDS.length;
+    var array = Array.from({ length: length }, (_) => []);
     const lines = fileContent.split(/\r?\n/);
     for (const line of lines) {
         const trimmed = line.trim();
