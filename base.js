@@ -390,23 +390,7 @@ async function runSeba() {
         $id("graph-style").disabled = false;
         $id("x-axis").disabled = false;
         $id("y-axis").disabled = false;
-        // Clear event listeners and readd then,
-        // so that the graph updates with the current data
-        // Since the listeners are an anonymous closure over `data`,
-        // we replace the element with a clone; the clone doesn't
-        // copy the listener, so a new listener is added, which is
-        // then the only listener
-        for (const id of ["graph-style", "x-axis", "y-axis"]) {
-            const elem = $id(id);
-            const newElem = elem.cloneNode(true);
-            newElem.value = elem.value;
-            newElem.addEventListener("change", () => {
-                plot(data);
-                populateTable(data);
-            });
-            const parent = elem.parentNode;
-            parent.replaceChild(newElem, elem);
-        }
+
         populateTable(data);
         plot(data);
     } catch (e) {
@@ -564,6 +548,25 @@ function downloadData() {
     URL.revokeObjectURL(url);
 }
 
+function addEventListeners() {
+    $id("start-button").addEventListener("click", runSeba);
+    $id("download-data").addEventListener("click", downloadData);
+    $id("lang-switch").addEventListener("change", async (event) => {
+        await switchLang(event.target.value);
+    });
+    for (const id of ["graph-style", "x-axis", "y-axis"]) {
+        const elem = $id(id);
+        const newElem = elem.cloneNode(true);
+        newElem.value = elem.value;
+        newElem.addEventListener("change", () => {
+            plot(data);
+            populateTable(data);
+        });
+        const parent = elem.parentNode;
+        parent.replaceChild(newElem, elem);
+    }
+}
+
 async function init() {
     if (DEBUG) {
         $id("program-log").style.display = "block";
@@ -586,11 +589,8 @@ async function init() {
     const lang = cookie?.value || DEFAULT_LANG; /* cookie or default */
     $id("lang-switch").value = lang;
 
-    $id("start-button").addEventListener("click", runSeba);
-    $id("download-data").addEventListener("click", downloadData);
-    $id("lang-switch").addEventListener("change", async (event) => {
-        await switchLang(event.target.value);
-    });
+    addEventListeners();
+
     await loadTranslations();
     switchLang(lang);
     $id("start-button").disabled = false;
