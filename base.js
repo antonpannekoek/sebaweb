@@ -139,8 +139,6 @@ function createControls() {
 
         slider.addEventListener("input", function (evt) {
             updateFromSlider(this);
-        });
-        slider.addEventListener("input", function (evt) {
             clearTimeout(updateTimeout);
             if ($id("direct-update").checked) {
                 updateTimeout = setTimeout(() => {
@@ -152,8 +150,6 @@ function createControls() {
         input.addEventListener("blur", (event) => clampValue(event.target));
         input.addEventListener("input", function (evt) {
             updateFromInput(this);
-        });
-        input.addEventListener("input", function (evt) {
             clearTimeout(updateTimeout);
             if ($id("direct-update").checked) {
                 updateTimeout = setTimeout(() => {
@@ -237,7 +233,7 @@ async function switchLang(lang) {
         if (key in translation) {
             element.innerHTML = translation[key];
         } else {
-	    const value = translations[FALLBACK_LANG][key];
+            const value = translations[FALLBACK_LANG][key];
             console.log(
                 `falling back to default translation for ${key} = ${value}`,
             );
