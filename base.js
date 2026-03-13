@@ -225,16 +225,12 @@ function updatePlotOptions() {
     }
 }
 
-async function switchLang(lang) {
+function switchLang(lang) {
     document.documentElement.lang = lang;
     if (!(lang in translations)) {
         lang = FALLBACK_LANG;
     }
-    try {
-        await cookieStore.set("lang", lang);
-    } catch (error) {
-        console.warn(`Error setting language cookie: ${error}`);
-    }
+    localStorage.setItem("lang", lang);
     const translation = translations[lang];
     const elements = document.querySelectorAll("[data-i8n]");
     for (const element of elements) {
@@ -251,6 +247,22 @@ async function switchLang(lang) {
     }
     updateTableHeader();
     updatePlotOptions();
+}
+
+// Update HTML data-theme attribute for use in the CSS
+// and replot if there was a theme switch
+function switchTheme(theme) {
+    console.log(theme, typeof theme);
+    if (theme === "system") {
+        delete document.documentElement.dataset.theme;
+    } else {
+        document.documentElement.dataset.theme = theme;
+    }
+    localStorage.setItem("theme", theme);
+
+    if (Object.keys(data).length) {
+        plot(data);
+    }
 }
 
 function updateFromSlider(slider) {
@@ -562,8 +574,11 @@ function downloadData() {
 function addEventListeners() {
     $id("start-button").addEventListener("click", runSeba);
     $id("download-data").addEventListener("click", downloadData);
-    $id("lang-switch").addEventListener("change", async (event) => {
-        await switchLang(event.target.value);
+    $id("lang-switch").addEventListener("change", (event) => {
+        switchLang(event.target.value);
+    });
+    $id("theme-switch").addEventListener("change", (event) => {
+        switchTheme(event.target.value);
     });
     for (const id of ["graph-style", "x-axis", "y-axis"]) {
         const elem = $id(id);
@@ -595,10 +610,15 @@ async function init() {
     }
     createControls();
     updateMinMax();
-    /* Get a default language setting from the cookies */
-    const cookie = await cookieStore.get("lang");
-    const lang = cookie?.value || DEFAULT_LANG; /* cookie or default */
+    /* Get a default language setting from the local storage */
+    const lang = localStorage.getItem("lang") || DEFAULT_LANG;
     $id("lang-switch").value = lang;
+    /* Get a default theme/mode setting from the local storage */
+    const theme = localStorage.getItem("theme") || "system";
+    $id("theme-switch").value = theme;
+    if (theme !== "system") {
+        document.documentElement.dataset.theme = theme;
+    }
 
     addEventListeners();
 
