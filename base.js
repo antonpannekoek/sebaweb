@@ -3,12 +3,7 @@ import createSeBaHires from "./seba_hirestime.js";
 import * as C_S from "./constants-single.js";
 import * as C_B from "./constants-binary.js";
 
-//const USE_SINGLE = JSON.parse(
-//    document.getElementById('variant').textContent)['single'];
-//const USE_SINGLE = document.querySelector('meta[name="variant"]').content == "single";
-// get the query parameters from the url
 const params = new URLSearchParams(window.location.search);
-const USE_SINGLE = params.get("variant") == "single";
 const VARIANT = params.get("variant");
 const DEBUG = params.get("debug") == "debug";
 
@@ -31,6 +26,13 @@ const GRAPHDEFAULTS = {
     y: VARIANT == "single" ? "mass" : "mass1",
 };
 
+const GRAPH_SCALES = {
+    linlin: ["linear", "linear"],
+    linlog: ["linear", "log"],
+    loglin: ["log", "linear"],
+    loglog: ["log", "log"],
+};
+
 // Supported languages with a translation file
 const LANGUAGES = ["en", "nl"];
 const DEFAULT_LANG = "nl";
@@ -39,7 +41,6 @@ const stdoutElem = $q("#program-log output");
 
 // Collect output lines in memory as well
 const stdoutLines = [];
-const stderrLines = [];
 
 function $id(idspec) {
     return document.getElementById(idspec);
@@ -139,8 +140,6 @@ function createControls() {
 
         slider.addEventListener("input", function (evt) {
             updateFromSlider(this);
-        });
-        slider.addEventListener("input", function (evt) {
             clearTimeout(updateTimeout);
             if ($id("direct-update").checked) {
                 updateTimeout = setTimeout(() => {
@@ -152,8 +151,6 @@ function createControls() {
         input.addEventListener("blur", (event) => clampValue(event.target));
         input.addEventListener("input", function (evt) {
             updateFromInput(this);
-        });
-        input.addEventListener("input", function (evt) {
             clearTimeout(updateTimeout);
             if ($id("direct-update").checked) {
                 updateTimeout = setTimeout(() => {
@@ -237,10 +234,11 @@ async function switchLang(lang) {
         if (key in translation) {
             element.innerHTML = translation[key];
         } else {
+            const value = translations[FALLBACK_LANG][key];
             console.log(
                 `falling back to default translation for ${key} = ${value}`,
             );
-            element.innerHTML = translations[FALLBACK_LANG][key];
+            element.innerHTML = value;
         }
     }
     updateTableHeader();
@@ -252,7 +250,7 @@ function updateFromSlider(slider) {
     let input = $id(`${id}-input`);
     const control = CONST.CONTROLS[id];
     const actualValue = control["log"]
-        ? Math.pow(10, parseFloat(slider.value))
+        ? 10 ** parseFloat(slider.value)
         : parseFloat(slider.value);
 
     input.value = actualValue.toFixed(parseInt(input.dataset.prec));
@@ -304,12 +302,12 @@ function clampValue(input) {
 // function to translate strings in JavaScript code
 function _t(key) {
     let lang = document.documentElement.lang;
-    if ((!lang) in translations) {
+    if (!(lang in translations)) {
         lang = FALLBACK_LANG;
     }
     const translation = translations[lang];
     let string = "";
-    if ((!key) in translation) {
+    if (!(key in translation)) {
         string = translations[FALLBACK_LANG][key];
     } else {
         string = translation[key];
@@ -318,10 +316,6 @@ function _t(key) {
         string = "";
     }
     return string;
-}
-
-function createConfig() {
-    return;
 }
 
 // Run SeBa
@@ -374,12 +368,15 @@ async function runSeba() {
     // Remove previous SeBa.data if it exists
     try {
         Module.FS.unlink("SeBa.data");
-    } catch (e) {
+    } catch (error) {
         // Ignore if file did not exist
-        console.log(
-            "Ignoring error when attempting to remove 'SeBa.data': ",
-            e,
-        );
+        if (error.errno != 44) {
+            // 44 appears
+            console.error(
+                "Error when attempting to remove 'SeBa.data': ",
+                error,
+            );
+        }
     }
 
     // Call main(argc, argv) via callMain
@@ -400,23 +397,7 @@ async function runSeba() {
         $id("graph-style").disabled = false;
         $id("x-axis").disabled = false;
         $id("y-axis").disabled = false;
-        // Clear event listeners and readd then,
-        // so that the graph updates with the current data
-        // Since the listeners are an anonymous closure over `data`,
-        // we replace the element with a clone; the clone doesn't
-        // copy the listener, so a new listener is added, which is
-        // then the only listener
-        for (const id of ["graph-style", "x-axis", "y-axis"]) {
-            const elem = $id(id);
-            const newElem = elem.cloneNode(true);
-            newElem.value = elem.value;
-            newElem.addEventListener("change", () => {
-                plot(data);
-                populateTable(data);
-            });
-            const parent = elem.parentNode;
-            parent.replaceChild(newElem, elem);
-        }
+
         populateTable(data);
         plot(data);
     } catch (e) {
@@ -429,7 +410,8 @@ async function runSeba() {
 }
 
 function readData(fileContent) {
-    var array = Array.from({ length: 18 }, (_) => []);
+    const length = CONST.DATAFIELDS.length;
+    var array = Array.from({ length: length }, (_) => []);
     const lines = fileContent.split(/\r?\n/);
     for (const line of lines) {
         const trimmed = line.trim();
@@ -437,9 +419,7 @@ function readData(fileContent) {
             continue;
         }
         const cols = trimmed.split(/\s+/);
-        for (const i in cols) {
-            array[i].push(parseFloat(cols[i]));
-        }
+        cols.forEach((value, i) => array[i].push(parseFloat(value)));
     }
 
     /* Convert the columns to named columns */
@@ -456,25 +436,25 @@ function readData(fileContent) {
         radius += "1";
         lum += "1";
     }
-    data[efftemp] = data[efftemp].map((value) => Math.pow(10, value));
+    data[efftemp] = data[efftemp].map((value) => 10 ** value);
     data[lum] = data[radius].map(
         (item, i) =>
             (4 *
                 Math.PI *
                 SIGMA_SB *
-                Math.pow(item * R_SUN, 2) *
-                Math.pow(data[efftemp][i], 4)) /
+                (item * R_SUN) ** 2 *
+                data[efftemp][i] ** 4) /
             L_SUN,
     );
     // Star 2 remains the same; it's simply ignored for single evolution
-    data["efftemp2"] = data["efftemp2"].map((value) => Math.pow(10, value));
+    data["efftemp2"] = data["efftemp2"].map((value) => 10 ** value);
     data["lum2"] = data["radius2"].map(
         (item, i) =>
             (4 *
                 Math.PI *
                 SIGMA_SB *
-                Math.pow(item * R_SUN, 2) *
-                Math.pow(data["efftemp2"][i], 4)) /
+                (item * R_SUN) ** 2 *
+                data["efftemp2"][i] ** 4) /
             L_SUN,
     );
 
@@ -483,7 +463,7 @@ function readData(fileContent) {
 
 function populateTable(data) {
     let trs = [];
-    for (var rownr = 0; rownr < data[CONST.USERDATAFIELDS[0]].length; ++rownr) {
+    for (let rownr = 0; rownr < data[CONST.USERDATAFIELDS[0]].length; ++rownr) {
         let tr = $create("tr");
         for (const col of CONST.USERDATAFIELDS) {
             const td = $create("td");
@@ -499,28 +479,15 @@ function populateTable(data) {
 function plot(data) {
     let xaxis = $id("x-axis").value;
     let yaxis = $id("y-axis").value;
-    if ((!xaxis) in data) {
+    if (!(xaxis in data)) {
         xaxis = GRAPHDEFAULTS["x"];
     }
-    if ((!yaxis) in data) {
+    if (!(yaxis in data)) {
         yaxis = GRAPHDEFAULTS["y"];
     }
 
     const graphtype = $id("graph-style").value;
-    let xtype = "log";
-    let ytype = "log";
-    if (graphtype == "linlin") {
-        xtype = "linear";
-        ytype = "linear";
-    }
-    if (graphtype == "loglin") {
-        xtype = "log";
-        ytype = "linear";
-    }
-    if (graphtype == "linlog") {
-        xtype = "linear";
-        ytype = "log";
-    }
+    const [xtype, ytype] = GRAPH_SCALES[graphtype] ?? ["log", "log"];
 
     let plottingData = {
         x: data[xaxis],
@@ -573,6 +540,25 @@ function downloadData() {
     URL.revokeObjectURL(url);
 }
 
+function addEventListeners() {
+    $id("start-button").addEventListener("click", runSeba);
+    $id("download-data").addEventListener("click", downloadData);
+    $id("lang-switch").addEventListener("change", async (event) => {
+        await switchLang(event.target.value);
+    });
+    for (const id of ["graph-style", "x-axis", "y-axis"]) {
+        const elem = $id(id);
+        const newElem = elem.cloneNode(true);
+        newElem.value = elem.value;
+        newElem.addEventListener("change", () => {
+            plot(data);
+            populateTable(data);
+        });
+        const parent = elem.parentNode;
+        parent.replaceChild(newElem, elem);
+    }
+}
+
 async function init() {
     if (DEBUG) {
         $id("program-log").style.display = "block";
@@ -595,15 +581,11 @@ async function init() {
     const lang = cookie?.value || DEFAULT_LANG; /* cookie or default */
     $id("lang-switch").value = lang;
 
-    $id("start-button").addEventListener("click", runSeba);
-    $id("download-data").addEventListener("click", downloadData);
-    $id("lang-switch").addEventListener("change", async (event) => {
-        await switchLang(event.target.value);
-    });
-    loadTranslations().then(() => {
-        switchLang(lang);
-        $id("start-button").disabled = false;
-    });
+    addEventListeners();
+
+    await loadTranslations();
+    switchLang(lang);
+    $id("start-button").disabled = false;
 }
 
 // `init()` sets up some essentials after the page has loaded,
