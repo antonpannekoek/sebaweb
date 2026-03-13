@@ -250,7 +250,7 @@ function updateFromSlider(slider) {
     let input = $id(`${id}-input`);
     const control = CONST.CONTROLS[id];
     const actualValue = control["log"]
-        ? Math.pow(10, parseFloat(slider.value))
+        ? 10 ** parseFloat(slider.value)
         : parseFloat(slider.value);
 
     input.value = actualValue.toFixed(parseInt(input.dataset.prec));
@@ -436,25 +436,25 @@ function readData(fileContent) {
         radius += "1";
         lum += "1";
     }
-    data[efftemp] = data[efftemp].map((value) => Math.pow(10, value));
+    data[efftemp] = data[efftemp].map((value) => 10 ** value);
     data[lum] = data[radius].map(
         (item, i) =>
             (4 *
                 Math.PI *
                 SIGMA_SB *
-                Math.pow(item * R_SUN, 2) *
-                Math.pow(data[efftemp][i], 4)) /
+                (item * R_SUN) ** 2 *
+                data[efftemp][i] ** 4) /
             L_SUN,
     );
     // Star 2 remains the same; it's simply ignored for single evolution
-    data["efftemp2"] = data["efftemp2"].map((value) => Math.pow(10, value));
+    data["efftemp2"] = data["efftemp2"].map((value) => 10 ** value);
     data["lum2"] = data["radius2"].map(
         (item, i) =>
             (4 *
                 Math.PI *
                 SIGMA_SB *
-                Math.pow(item * R_SUN, 2) *
-                Math.pow(data["efftemp2"][i], 4)) /
+                (item * R_SUN) ** 2 *
+                data["efftemp2"][i] ** 4) /
             L_SUN,
     );
 
