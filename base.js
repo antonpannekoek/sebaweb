@@ -33,6 +33,14 @@ const GRAPH_SCALES = {
     loglog: ["log", "log"],
 };
 
+const PLOTLY_DARK_MODE = {
+    paper_bgcolor: "#1a1a1a",
+    plot_bgcolor: "#222",
+    font: { color: "#f0f0f0" },
+    xaxis: { color: "#f0f0f0", gridcolor: "#444", zerolinecolor: "#555" },
+    yaxis: { color: "#f0f0f0", gridcolor: "#444", zerolinecolor: "#555" },
+};
+
 // Supported languages with a translation file
 const LANGUAGES = ["en", "nl"];
 const DEFAULT_LANG = "nl";
@@ -498,18 +506,29 @@ function plot(data) {
     let width = $id("graph").offsetWidth ?? 700;
     width -= 100;
 
-    let layout = {
+    let theme = document.documentElement.dataset.theme; // explicit user-set theme
+    if (theme) {
+        theme = theme === "dark" ? PLOTLY_DARK_MODE : {};
+    } else {
+        // default to OS / browser theme
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? PLOTLY_DARK_MODE
+            : {};
+    }
+    const layout = {
+        ...theme,
         xaxis: {
             type: xtype,
             autorange: true,
+            ...theme.xaxis,
         },
         yaxis: {
             type: ytype,
             autorange: true,
+            ...theme.yaxis,
         },
         width: width,
     };
-
     Plotly.newPlot("plotly-graph", [plottingData], layout);
 }
 
