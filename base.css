@@ -384,3 +384,7 @@ select:disabled {
     pointer-events: none; /* Clicks pass through the SVG to elements below */
     overflow: visible; /* Allows drawing at negative coordinates */
 }
+
+svg {
+    font-size: 0.8rem;
+}

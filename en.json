@@ -95,5 +95,7 @@
   "bintype-9": "separated",
   "show-star-size": "Show star size",
   "scale-zoom": "Zoom",
-  "sun-earth-for-scale": "Sun and Earth for scale"
+  "sun-earth-for-scale": "Sun and Earth for scale",
+  "sun": "Sun",
+  "earth": "Earth"
 }
