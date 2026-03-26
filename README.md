@@ -28,9 +28,9 @@ The `*.json` files are translation files.
 
 ## Development
 
-See the file [`development.md`](development.md) for details if you want to furhter develop SeBaWeb.
+See the file [`development.md`](development.md) for details if you want to further develop SeBaWeb.
 
 
 ## Copyright & license
 
-SeBaWeb is copyright (c) 2026, Universify of Amsterdam. It is licensed under the MIT license; see the LICENSE file.
+SeBaWeb is copyright (c) 2026, University of Amsterdam. It is licensed under the MIT license; see the LICENSE file.
