@@ -140,7 +140,6 @@ main {
 #introduction {
     grid-area: introduction;
     justify-self: start;
-    display: none;
     max-width: var(--max-content-width);
 }
 
@@ -148,7 +147,6 @@ main {
     grid-area: controls;
     align-self: start;
     min-width: 300px;
-    display: none;
 }
 
 #graph {
@@ -157,7 +155,6 @@ main {
 
     min-width: 700px;
 
-    display: none;
     overflow: visible;
 }
 
@@ -165,13 +162,11 @@ main {
     grid-area: data-section;
     overflow-x: auto;
     overflow-y: hidden;
-    display: none;
 }
 
 #program-log {
     grid-area: program-log;
     justify-self: start;
-    display: none;
 }
 
 h1 {
@@ -364,10 +359,11 @@ select:disabled {
     align-items: flex-start;
 }
 
-#star-size-zoomrange,
-#star-size-zoomvalue,
-#sun-earth-scale,
-#star-size-graph {
+.visible {
+    display: block;
+}
+
+.invisible {
     display: none;
 }
 

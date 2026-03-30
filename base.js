@@ -655,25 +655,33 @@ function addEventListeners() {
 
     $id("show-size").addEventListener("change", (event) => {
         if (event.target.checked) {
-            $id("star-size-zoomrange").style.display = "block";
-            $id("star-size-zoomvalue").style.display = "block";
-            $id("sun-earth-scale").style.display = "block";
-            $id("star-size-graph").style.display = "block";
+            $id("star-size-zoomrange").classList.replace(
+                "invisible",
+                "visible",
+            );
+            $id("star-size-zoomvalue").classList.replace(
+                "invisible",
+                "visible",
+            );
+            $id("sun-earth-scale").classList.replace("invisible", "visible");
+            $id("star-size-graph").classList.replace("invisible", "visible");
             const zoom = $id("star-size-zoomrange").value;
             const scale = 10 ** parseFloat(zoom);
-            //$id("star-size-zoomvalue").innerHTML =
-            //    _t("scale-zoom") + `: ${scale.toPrecision(3)}`;
         } else {
-            $id("star-size-zoomrange").style.display = "none";
-            $id("star-size-zoomvalue").style.display = "none";
-            $id("sun-earth-scale").style.display = "none";
-            $id("star-size-graph").style.display = "none";
+            $id("star-size-zoomrange").classList.replace(
+                "visible",
+                "invisible",
+            );
+            $id("star-size-zoomvalue").classList.replace(
+                "visible",
+                "invisible",
+            );
+            $id("sun-earth-scale").classList.replace("visible", "invisible");
+            $id("star-size-graph").classList.replace("visible", "invisible");
         }
     });
     $id("star-size-zoomrange").addEventListener("change", (event) => {
         const scale = 10 ** parseFloat(event.target.value);
-        // $id("star-size-zoomvalue").innerHTML =
-        //     _t("scale-zoom") + `: ${scale.toPrecision(3)}`;
         const earth = $id("earth");
         earth.setAttribute("r", SIZES["earth"] * scale);
         $id("sun").setAttribute("r", SIZES["sun"] * scale);
@@ -767,18 +775,19 @@ function interpolateRadius(time, rkey) {
 
 async function init() {
     if (DEBUG) {
-        $id("program-log").style.display = "block";
+        $id("program-log").classList.replace("invisible", "visible");
     }
     if (VARIANT == "single" || VARIANT == "double" || VARIANT == "binary") {
-        $id("introduction").style.display = "none";
-        $id("controls").style.display = "block";
-        $id("graph").style.display = "block";
-        $id("data-section").style.display = "block";
+        $id("introduction").classList.replace("visible", "invisible");
+        $id("controls").classList.replace("invisible", "visible");
+        $id("graph").classList.replace("invisible", "visible");
+        $id("data-section").classList.replace("invisible", "visible");
     } else {
-        $id("introduction").style.display = "block";
-        $id("controls").style.display = "none";
-        $id("graph").style.display = "none";
-        $id("data-section").style.display = "none";
+        const a = $id("introduction").classList.replace("invisible", "visible");
+        console.log(a);
+        $id("controls").classList.replace("visible", "invisible");
+        $id("graph").classList.replace("visible", "invisible");
+        $id("data-section").classList.replace("visible", "invisible");
     }
     createControls();
     updateMinMax();
