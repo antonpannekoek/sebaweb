@@ -247,13 +247,20 @@ function switchLang(lang) {
     for (const element of elements) {
         const key = element.dataset.i8n;
         if (key in translation) {
-            element.innerHTML = translation[key];
+            let string = translation[key];
+            if (Array.isArray(string)) {
+                string = string.join("");
+            }
+            element.innerHTML = string;
         } else {
-            const value = translations[FALLBACK_LANG][key];
+            let string = translations[FALLBACK_LANG][key];
+            if (Array.isArray(string)) {
+                string = string.join("");
+            }
             console.log(
-                `falling back to default translation for ${key} = ${value}`,
+                `falling back to default translation for ${key} = ${string}`,
             );
-            element.innerHTML = value;
+            element.innerHTML = string;
         }
     }
 
@@ -350,6 +357,9 @@ function _t(key) {
         string = translations[FALLBACK_LANG][key];
     } else {
         string = translation[key];
+    }
+    if (Array.isArray(string)) {
+        string = string.join("");
     }
     if (!string) {
         string = "";

@@ -5,7 +5,10 @@
   "menu-single": "Single",
   "menu-binary": "Binary",
   "introduction": "Introduction",
-  "introduction-text": "<p>SeBa is a software package to simulate the evolution of single and binary stars from the zero-age main-sequence up to and including remnant phases. It is valid for masses in the range 0.01 &ndash; 100 Solar masses with variable metallicity. SeBa includes prescriptions for mass loss by stellar winds, supernova and binary interactions.</p><p>This is an online version, which allows one to run SeBa through the browser; it has limited configuration parameters compared to the stand-alone command-line tool, and can serve as a starting point to learn about stellar (binary) evolution.</p>",
+  "introduction-text": [
+    "<p>SeBa is a software package to simulate the evolution of single and binary stars from the zero-age main-sequence up to and including remnant phases. It is valid for masses in the range 0.01 &ndash; 100 Solar masses with variable metallicity. SeBa includes prescriptions for mass loss by stellar winds, supernova and binary interactions.</p>",
+    "<p>This is an online version, which allows one to run SeBa through the browser; it has limited configuration parameters compared to the stand-alone command-line tool, and can serve as a starting point to learn about stellar (binary) evolution.</p>"
+  ],
   "parameters": "parameters",
   "mass-name": "Mass of the star",
   "mass1-name": "Mass star 1",
@@ -18,7 +21,7 @@
   "mass1-tooltip": "Mass of the primary star; this should be larger than or equal to the secondary star.",
   "mass2-tooltip": "Mass of the secondary star; this should be smaller than or equal to the orimary star.",
   "ecc-tooltip": "Eccentricity of the elliptical orbit: 0 is completely circular, 0.99 is nearly a straight line.",
-  "sep-tooltip": "Separation between the two stars, in Solar radii.",
+  "sep-tooltip": "Separation between the two stars (long axis of the elliptical orbit), in Solar radii.",
   "time-tooltip": "Time span of simulation in units of mega-years (= million years)",
   "metal-tooltip": "Metalliticity is the fraction of atoms with atom numbers higher than Helium compared to the total star mass (which is mainly Hydrogen and Helium)",
   "program-log": "Program log",
